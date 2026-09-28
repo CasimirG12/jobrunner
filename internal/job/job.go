@@ -1,9 +1,13 @@
 package job
 
 import (
+	"errors"
 	"slices"
 	"time"
+	"uuid"
 )
+
+var ErrInvalidKind = errors.New("job: invalid kind")
 
 type Status string
 
@@ -69,4 +73,17 @@ type Job struct {
 	CreatedAt    time.Time  `json:"created_at"`
 	StartedAt    *time.Time `json:"started_at"`
 	EndedAt      *time.Time `json:"ended_at"`
+}
+
+func New(input string, kind Kind) (Job, error) {
+	if !kind.IsValid() {
+		return Job{}, ErrInvalidKind
+	}
+	return Job{
+		ID:        uuid.New().String(),
+		Kind:      kind,
+		Status:    StatusPending,
+		Input:     input,
+		CreatedAt: time.Now().UTC(),
+	}, nil
 }
