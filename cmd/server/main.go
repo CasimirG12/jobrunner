@@ -17,5 +17,6 @@ func main() {
 	server := api.NewServer(store)
 	routes := server.Routes()
 
+	log.Println("Listening to port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", routes))
 }
