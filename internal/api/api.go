@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -44,9 +45,9 @@ type CreateJobReq struct {
 }
 
 type JobStore interface {
-	Get(id string) (job.Job, error)
-	List() ([]job.Job, error)
-	Create(j job.Job) error
+	Get(ctx context.Context, id string) (job.Job, error)
+	List(ctx context.Context) ([]job.Job, error)
+	Create(ctx context.Context, j job.Job) error
 }
 
 type Server struct {
@@ -81,7 +82,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.store.Create(newJob)
+	err = s.store.Create(r.Context(), newJob)
 	if err != nil {
 		log.Printf("create job: %v", err)
 		writeError(w, "internal server error", http.StatusInternalServerError)
@@ -93,7 +94,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getJob(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	result, err := s.store.Get(id)
+	result, err := s.store.Get(r.Context(), id)
 
 	if err != nil {
 		if errors.Is(err, job.ErrNotFound) {
@@ -108,7 +109,7 @@ func (s *Server) getJob(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) listJobs(w http.ResponseWriter, r *http.Request) {
-	list, err := s.store.List()
+	list, err := s.store.List(r.Context())
 	if err != nil {
 		log.Printf("list jobs: %v", err)
 		writeError(w, "internal server error", http.StatusInternalServerError)

@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"errors"
 	"sync"
 
@@ -20,7 +21,7 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-func (s *MemoryStore) Get(id string) (job.Job, error) {
+func (s *MemoryStore) Get(_ context.Context, id string) (job.Job, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -31,7 +32,7 @@ func (s *MemoryStore) Get(id string) (job.Job, error) {
 	return result, nil
 }
 
-func (s *MemoryStore) List() ([]job.Job, error) {
+func (s *MemoryStore) List(_ context.Context) ([]job.Job, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	result := make([]job.Job, 0, len(s.jobs))
@@ -42,7 +43,7 @@ func (s *MemoryStore) List() ([]job.Job, error) {
 	return result, nil
 }
 
-func (s *MemoryStore) Create(j job.Job) error {
+func (s *MemoryStore) Create(_ context.Context, j job.Job) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.jobs[j.ID]; ok {
