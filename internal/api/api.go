@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/CasimirG12/jobrunner/internal/job"
-	"github.com/CasimirG12/jobrunner/internal/store"
 )
 
 const (
@@ -44,8 +43,14 @@ type CreateJobReq struct {
 	Input string   `json:"input"`
 }
 
+type JobStore interface {
+	Get(id string) (job.Job, error)
+	List() ([]job.Job, error)
+	Create(j job.Job) error
+}
+
 type Server struct {
-	store *store.MemoryStore
+	store JobStore
 }
 
 func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
@@ -88,10 +93,10 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getJob(w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
-	result, err := s.store.GetByID(id)
+	result, err := s.store.Get(id)
 
 	if err != nil {
-		if errors.Is(err, store.ErrNotFound) {
+		if errors.Is(err, job.ErrNotFound) {
 			writeError(w, "job not found", http.StatusNotFound)
 			return
 		}
@@ -120,8 +125,8 @@ func (s *Server) Routes() http.Handler {
 	return mux
 }
 
-func NewServer() *Server {
+func NewServer(s JobStore) *Server {
 	return &Server{
-		store: store.NewMemoryStore(),
+		store: s,
 	}
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/CasimirG12/jobrunner/internal/job"
 )
 
-var ErrNotFound = errors.New("store: job not found")
 var ErrAlreadyExists = errors.New("store: job id already exists")
 
 type MemoryStore struct {
@@ -21,13 +20,13 @@ func NewMemoryStore() *MemoryStore {
 	}
 }
 
-func (s *MemoryStore) GetByID(id string) (job.Job, error) {
+func (s *MemoryStore) Get(id string) (job.Job, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
 	result, ok := s.jobs[id]
 	if !ok {
-		return job.Job{}, ErrNotFound
+		return job.Job{}, job.ErrNotFound
 	}
 	return result, nil
 }

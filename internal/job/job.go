@@ -8,6 +8,7 @@ import (
 )
 
 var ErrInvalidKind = errors.New("job: invalid kind")
+var ErrNotFound = errors.New("store: job not found")
 
 type Status string
 

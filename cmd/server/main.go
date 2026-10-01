@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/CasimirG12/jobrunner/internal/api"
+	"github.com/CasimirG12/jobrunner/internal/store"
 )
 
 type ResponseMessage struct {
@@ -12,7 +13,8 @@ type ResponseMessage struct {
 }
 
 func main() {
-	server := api.NewServer()
+	store := store.NewMemoryStore()
+	server := api.NewServer(store)
 	routes := server.Routes()
 
 	log.Fatal(http.ListenAndServe(":8080", routes))
